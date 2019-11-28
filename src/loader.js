@@ -200,7 +200,7 @@ module.exports = function loader(content, map, meta) {
     if (!interpolation.identifier) return null;
     const { loc } = node;
 
-    const memberProperty = node.property && node.property.name;
+    const memberProperty = (node.property && node.property.name) || 'val1';
 
     const imported = `###ASTROTURF_IMPORTED_${dependencies.length}###`;
     const source = `###ASTROTURF_SOURCE_${dependencies.length}###`;

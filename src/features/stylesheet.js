@@ -26,7 +26,8 @@ function buildStyleRequire(path, opts) {
     ...opts.pluginOptions,
   });
 
-  style.value = `${imports}${text}`;
+  const infix = path.get('tag').node.name === 'value' ? '@value val1: ' : '';
+  style.value = `${imports}${infix}${text}`;
 
   if (styles.has(style.absoluteFilePath))
     throw path.buildCodeFrameError(
@@ -50,7 +51,7 @@ export default {
 
     const tagPath = path.get('tag');
 
-    if (isCssTag(tagPath, pluginOptions)) {
+    if (isCssTag(tagPath, pluginOptions) || tagPath.node.name === 'value') {
       path.replaceWith(
         buildStyleRequire(path, {
           pluginOptions,

@@ -64,10 +64,11 @@ function resolveStyleInterpolation(
   const style = resolvedPath && nodeMap.get(resolvedPath.node);
 
   if (style) {
+    const imported = !style.isStyledComponent
+      ? (path.property && path.get('property').node.name) || 'val1'
+      : 'cls1';
     return {
-      imported: !style.isStyledComponent
-        ? path.get('property').node.name
-        : 'cls1',
+      imported,
       source: relative(
         dirname(localStyle.absoluteFilePath),
         style.absoluteFilePath,
@@ -88,12 +89,15 @@ function resolveStyleInterpolation(
           ? identifier.toLowerCase()[0] !== identifier[0]
           : interpolation.isStyledComponent;
 
+      const imported = !isStyledComponent
+        ? (path.property && path.get('property').node.name) || 'val1'
+        : 'cls1';
+
       return (
         interpolation && {
-          imported: !isStyledComponent
-            ? path.get('property').node.name
-            : 'cls1',
+          imported,
           ...interpolation,
+          isStyledComponent,
         }
       );
     }
@@ -222,11 +226,17 @@ export default ({
   let id = 0;
   let imports = '';
   text = text.replace(rPlaceholder, match => {
-    const { imported, source } = styleInterpolations.get(match);
+    const {
+      imported,
+      source,
+      isStyledComponent,
+      expr,
+    } = styleInterpolations.get(match);
     const localName = `a${id++}`;
 
     imports += `@value ${imported} as ${localName} from "${source}";\n`;
-    return `.${localName}`;
+    const prefix = isStyledComponent || expr.isMemberExpression() ? '.' : '';
+    return `${prefix}${localName}`;
   });
 
   if (imports) imports += '\n\n';
